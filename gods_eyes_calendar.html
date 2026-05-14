@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>God's Eyes — Lịch khám ngoài</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh}
+.container{max-width:960px;margin:0 auto;padding:1.5rem}
+h1{font-size:18px;font-weight:600;margin-bottom:1.5rem;color:#1a1a1a;display:flex;align-items:center;gap:8px}
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:8px;flex-wrap:wrap}
+.nav-group{display:flex;align-items:center;gap:8px}
+.month-label{font-size:17px;font-weight:500;min-width:160px;text-align:center}
+.btn{background:#fff;border:1px solid #ddd;border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;color:#1a1a1a}
+.btn:hover{background:#f0f0f0}
+.btn-primary{background:#e6f1fb;border-color:#b5d4f4;color:#0c447c}
+.btn-primary:hover{background:#d0e8f7}
+.capacity-bar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.cap-card{background:#fff;border-radius:8px;padding:10px 14px;flex:1;min-width:110px;border:1px solid #eee}
+.cap-label{font-size:11px;color:#666;margin-bottom:4px;line-height:1.3}
+.cap-val{font-size:18px;font-weight:600;color:#1a1a1a}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:0;border:1px solid #ddd;border-radius:12px;overflow:hidden;background:#fff}
+.dow-header{background:#f8f8f8;padding:8px 4px;text-align:center;font-size:11px;font-weight:600;color:#666;border-bottom:1px solid #eee}
+.day-cell{min-height:90px;padding:6px;border-right:1px solid #eee;border-bottom:1px solid #eee;background:#fff;cursor:pointer;transition:background 0.1s;vertical-align:top}
+.day-cell:hover{background:#fafafa}
+.day-cell.other-month{background:#fafafa}
+.day-cell.other-month .day-num{color:#ccc}
+.day-cell:nth-child(7n){border-right:none}
+.day-num{font-size:12px;color:#999;margin-bottom:4px}
+.day-cell.today .day-num{background:#378add;color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px}
+.day-cell.selected{background:#f0f7ff;outline:2px solid #378add;outline-offset:-2px}
+.event-chip{font-size:10px;padding:2px 5px;border-radius:4px;margin-bottom:2px;cursor:pointer;line-height:1.4}
+.chip-school{background:#e6f1fb;color:#0c447c}
+.chip-factory{background:#e1f5ee;color:#085041}
+.chip-elderly{background:#faeeda;color:#633806}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal{background:#fff;border-radius:12px;border:1px solid #ddd;width:500px;max-width:96vw;max-height:88vh;overflow-y:auto;padding:1.25rem}
+.modal-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem}
+.modal-title{font-size:16px;font-weight:600;color:#1a1a1a}
+.form-row{margin-bottom:12px}
+.form-label{font-size:12px;color:#666;margin-bottom:4px;display:block}
+.form-row input,.form-row select,.form-row textarea{width:100%;padding:7px 10px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a}
+.form-row textarea{resize:vertical;min-height:56px}
+.section-title{font-size:11px;font-weight:600;color:#999;margin:14px 0 8px;text-transform:uppercase;letter-spacing:0.05em}
+.staff-group{margin-bottom:10px}
+.staff-group-label{font-size:11px;color:#aaa;margin-bottom:4px;padding-left:2px}
+.staff-list{display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto}
+.staff-item{display:flex;align-items:center;gap:8px;font-size:13px;padding:3px 6px;border-radius:6px}
+.staff-item:hover{background:#f5f5f5}
+.staff-item input[type=checkbox]{width:14px;height:14px;flex-shrink:0}
+.freelance-badge{font-size:10px;padding:1px 5px;border-radius:8px;background:#e1f5ee;color:#085041;margin-left:2px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:1rem;border-top:1px solid #eee;padding-top:1rem}
+.detail-field{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;font-size:13px}
+.detail-icon{color:#999;margin-top:1px;flex-shrink:0;font-size:16px}
+.detail-label{font-size:11px;color:#999;margin-bottom:3px}
+.detail-val{color:#1a1a1a}
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+.badge-school{background:#e6f1fb;color:#0c447c}
+.badge-factory{background:#e1f5ee;color:#085041}
+.badge-elderly{background:#faeeda;color:#633806}
+.staff-tag{display:inline-flex;align-items:center;gap:4px;border-radius:10px;padding:2px 8px;font-size:11px;margin:2px}
+.del-btn{background:#fff;border:1px solid #f09595;color:#e24b4a;border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer}
+.del-btn:hover{background:#fff0f0}
+.client-block{background:#f8f8f8;border-radius:8px;padding:10px 12px;margin-bottom:12px}
+.inline-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.sync-row{display:flex;align-items:center;gap:12px}
+.sync-btn{font-size:11px;color:#aaa;cursor:pointer;display:inline-flex;align-items:center;gap:4px;background:none;border:none;padding:0}
+.sync-btn:hover{color:#666}
+.status-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle}
+.dot-ok{background:#1d9e75}
+.dot-err{background:#e24b4a}
+.dot-loading{background:#f0a500}
+.toast{position:fixed;bottom:20px;right:20px;padding:8px 16px;border-radius:8px;font-size:13px;color:#fff;z-index:999}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1><i class="ti ti-eye"></i> God's Eyes — Lịch khám ngoài</h1>
+  <div class="toolbar">
+    <div class="nav-group">
+      <button class="btn" onclick="changeMonth(-1)"><i class="ti ti-chevron-left"></i></button>
+      <span class="month-label" id="month-label"></span>
+      <button class="btn" onclick="changeMonth(1)"><i class="ti ti-chevron-right"></i></button>
+      <button class="btn" onclick="goToday()">Hôm nay</button>
+    </div>
+    <div class="sync-row">
+      <span id="sync-status" style="font-size:11px;color:#aaa"></span>
+      <button class="sync-btn" onclick="syncAll(true)" id="sync-btn"><i class="ti ti-refresh"></i> Sync</button>
+      <button class="btn btn-primary" onclick="openAdd(selectedDate)"><i class="ti ti-plus"></i> Thêm đợt khám</button>
+    </div>
+  </div>
+  <div class="capacity-bar" id="capacity-bar"></div>
+  <div class="calendar-grid" id="calendar-grid">
+    <div class="dow-header">T2</div><div class="dow-header">T3</div><div class="dow-header">T4</div>
+    <div class="dow-header">T5</div><div class="dow-header">T6</div><div class="dow-header">T7</div>
+    <div class="dow-header">CN</div>
+    <div style="grid-column:1/-1;padding:2rem;text-align:center;color:#aaa;font-size:13px">
+      <i class="ti ti-loader"></i> Đang tải dữ liệu...
+    </div>
+  </div>
+</div>
+<div id="modal-root"></div>
+
+<script>
+const STAFF_CSV  = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQc04P4KA_KNWZtlMWeUIBm_QzSbAWeLQIVqZH8S8XgVqfTBPQ6LYnC5eoMhoN-vYyuvnWKpieC7bxH/pub?gid=0&single=true&output=csv";
+const EVENTS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQc04P4KA_KNWZtlMWeUIBm_QzSbAWeLQIVqZH8S8XgVqfTBPQ6LYnC5eoMhoN-vYyuvnWKpieC7bxH/pub?gid=1992029811&single=true&output=csv";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzH6aDXR-qFA64THm-QLjW3Htiqa9WsgKwnhefawzrc9Ruon22r3SiP5to74IQYNy844A/exec";
+
+const ROLE_GROUP_LABELS = {
+  "Doctor":"Bác sĩ","Optometrist":"Cử nhân khúc xạ",
+  "Optical Sale":"Kinh doanh","Pharmacy Sale":"Kinh doanh",
+  "AC":"Sàng lọc thị lực","AR":"Sàng lọc thị lực",
+  "VAC":"Hỗ trợ","IT Support":"Hỗ trợ","Coordinate":"Hỗ trợ","Cashier":"Hỗ trợ"
+};
+const ROLE_STYLE = {
+  "Doctor":        {bg:"#fbeaf0",tc:"#72243e"},
+  "Optometrist":   {bg:"#e6f1fb",tc:"#0c447c"},
+  "Optical Sale":  {bg:"#e1f5ee",tc:"#085041"},
+  "Pharmacy Sale": {bg:"#eaf3de",tc:"#27500a"},
+  "VAC":           {bg:"#faeeda",tc:"#633806"},
+  "AR":            {bg:"#f1efe8",tc:"#444441"},
+  "IT Support":    {bg:"#eeedfe",tc:"#3c3489"},
+  "Coordinate":    {bg:"#faece7",tc:"#712b13"},
+};
+const TYPE_LABELS = {school:"Trường học",factory:"Nhà máy / Công ty",elderly:"Người cao tuổi"};
+
+let STAFF  = [];
+let events = [];
+let nextId = 1000;
+let isSaving = false;
+let cur = new Date();
+let selectedDate = fmtDate(cur);
+let viewYear = cur.getFullYear(), viewMonth = cur.getMonth();
+
+function parseCSV(text){
+  const lines=text.trim().split("\n");
+  const headers=lines[0].split(",").map(c=>c.trim().replace(/^"|"$/g,""));
+  return lines.slice(1).filter(l=>l.trim()).map(line=>{
+    const cols=[];let cur2="",inQ=false;
+    for(const ch of line){
+      if(ch==='"'){inQ=!inQ}
+      else if(ch===","&&!inQ){cols.push(cur2.trim());cur2=""}
+      else cur2+=ch;
+    }
+    cols.push(cur2.trim());
+    const obj={};headers.forEach((h,i)=>obj[h]=cols[i]||"");
+    return obj;
+  });
+}
+
+async function loadStaff(){
+  const res=await fetch(STAFF_CSV+"&t="+Date.now());
+  const text=await res.text();
+  STAFF=parseCSV(text)
+    .filter(r=>r["Trạng thái"]==="Active"&&r["Tên"]&&!r["Tên"].startsWith("←"))
+    .map((r,i)=>({
+      id:parseInt(r["ID"])||i+1,
+      name:r["Tên"],role:r["Vai trò"],group:r["Nhóm"]||"Khác",
+      type:r["Loại"],phone:r["SĐT"]||"",note:r["Ghi chú"]||""
+    }));
+}
+
+async function loadEvents(){
+  const res=await fetch(EVENTS_CSV+"&t="+Date.now());
+  const text=await res.text();
+  const rows=parseCSV(text).filter(r=>r["ID"]&&r["Title"]);
+  events=rows.map(r=>({
+    id:parseInt(r["ID"]),
+    title:r["Title"],
+    client:r["Client"]||r["Title"],
+    type:r["Type"]||"school",
+    start:r["Start"],
+    end:r["End"],
+    staff:(r["Staff"]&&r["Staff"].trim())?r["Staff"].split("|").map(Number).filter(Boolean):[],
+    clientScr:parseInt(r["ClientScr"])||0,
+    pricePerScr:parseInt(r["PricePerScr"])||0,
+    note:r["Note"]||""
+  }));
+  if(events.length>0) nextId=Math.max(...events.map(e=>e.id))+1;
+}
+
+async function saveEvents(){
+  if(isSaving)return;
+  isSaving=true;
+  setStatus("saving");
+  try{
+    await fetch(SCRIPT_URL,{
+      method:"POST",
+      mode:"no-cors",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({action:"save",events})
+    });
+    setStatus("ok");
+  }catch(e){
+    setStatus("err");
+    showToast("Lỗi lưu dữ liệu","error");
+  }
+  isSaving=false;
+}
+
+async function syncAll(manual=false){
+  const btn=document.getElementById("sync-btn");
+  if(btn)btn.innerHTML='<i class="ti ti-loader"></i> Đang sync...';
+  setStatus("loading");
+  try{
+    await Promise.all([loadStaff(),loadEvents()]);
+    renderCalendar();
+    if(manual)showToast("Đã sync xong","success");
+    setStatus("ok");
+  }catch(e){
+    if(manual)showToast("Lỗi kết nối Google Sheet","error");
+    setStatus("err");
+    renderCalendar();
+  }
+  if(btn)btn.innerHTML='<i class="ti ti-refresh"></i> Sync';
+}
+
+function setStatus(state){
+  const el=document.getElementById("sync-status");if(!el)return;
+  const map={
+    ok:`<span class="status-dot dot-ok"></span>Đã đồng bộ`,
+    err:`<span class="status-dot dot-err"></span>Lỗi kết nối`,
+    saving:`<span class="status-dot dot-loading"></span>Đang lưu...`,
+    loading:`<span class="status-dot dot-loading"></span>Đang tải...`,
+  };
+  el.innerHTML=map[state]||"";
+}
+
+function fmtMoney(n){
+  if(!n||n===0)return"—";
+  if(n>=1000000000)return(n/1000000000).toFixed(1).replace(/\.0$/,"")+"tỷ";
+  if(n>=1000000)return(n/1000000).toFixed(1).replace(/\.0$/,"")+"tr";
+  return n.toLocaleString("vi-VN")+"đ";
+}
+function parseDate(s){const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)}
+function fmtDate(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function fmtDisplay(s){return parseDate(s).toLocaleDateString("vi-VN",{day:"2-digit",month:"2-digit",year:"numeric"})}
+function eventsOnDate(ds){return events.filter(ev=>{const d=parseDate(ds),s=parseDate(ev.start),e=parseDate(ev.end);return d>=s&&d<=e})}
+
+function calcCapacityForDate(ds){
+  const evs=eventsOnDate(ds);
+  const busy=new Set();
+  evs.forEach(ev=>ev.staff.forEach(id=>busy.add(id)));
+  const scr=evs.reduce((a,ev)=>a+ev.clientScr,0);
+  const rev=evs.reduce((a,ev)=>a+(ev.pricePerScr||0)*ev.clientScr,0);
+  return{total:evs.length,busy:busy.size,free:STAFF.length-busy.size,scr,rev};
+}
+
+function calcMonthlyRevenue(){
+  const ym=`${viewYear}-${String(viewMonth+1).padStart(2,"0")}`;
+  const me=events.filter(ev=>ev.start.slice(0,7)===ym||ev.end.slice(0,7)===ym);
+  return me.reduce((a,ev)=>{
+    const s=parseDate(ev.start),e=parseDate(ev.end);
+    let days=0;
+    for(let d=new Date(s);d<=e;d.setDate(d.getDate()+1)){if(fmtDate(d).slice(0,7)===ym)days++;}
+    return a+(ev.pricePerScr||0)*ev.clientScr*days;
+  },0);
+}
+
+function calcMonthlyStats(){
+  const ym=`${viewYear}-${String(viewMonth+1).padStart(2,"0")}`;
+  const me=events.filter(ev=>ev.start.slice(0,7)===ym||ev.end.slice(0,7)===ym);
+  let scr=0;
+  me.forEach(ev=>{
+    const s=parseDate(ev.start),e=parseDate(ev.end);
+    for(let d=new Date(s);d<=e;d.setDate(d.getDate()+1)){if(fmtDate(d).slice(0,7)===ym)scr+=ev.clientScr;}
+  });
+  return{total:me.length,scr};
+}
+function renderCapacity(){
+  const c=calcCapacityForDate(selectedDate);
+  const m=calcMonthlyStats();
+  const monthRev=calcMonthlyRevenue();
+  document.getElementById("capacity-bar").innerHTML=`
+    <div class="cap-card"><div class="cap-label">Đợt khám tháng</div><div class="cap-val">${m.total}</div></div>
+    <div class="cap-card"><div class="cap-label">Lượt khám tháng</div><div class="cap-val">${m.scr.toLocaleString()}</div></div>
+    <div class="cap-card"><div class="cap-label">Đợt khám ngày</div><div class="cap-val">${c.total}</div></div>
+    <div class="cap-card"><div class="cap-label">Lượt khám ngày</div><div class="cap-val">${c.scr.toLocaleString()}</div></div>
+    <div class="cap-card"><div class="cap-label">DT ngày (dự kiến)</div><div class="cap-val" style="color:#0c6e3d;font-size:16px">${fmtMoney(c.rev)}</div></div>
+    <div class="cap-card" style="border-left:3px solid #e6f1fb"><div class="cap-label">DT tháng (dự kiến)</div><div class="cap-val" style="color:#0c447c;font-size:16px">${fmtMoney(monthRev)}</div></div>
+    <div class="cap-card"><div class="cap-label">Nhân sự bận / trống</div><div class="cap-val">${c.busy} / <span style="color:#0f6e56">${c.free}</span></div></div>
+  `;
+}
+
+function renderCalendar(){
+  const lbl=new Date(viewYear,viewMonth,1).toLocaleDateString("vi-VN",{month:"long",year:"numeric"});
+  document.getElementById("month-label").textContent=lbl.charAt(0).toUpperCase()+lbl.slice(1);
+  const grid=document.getElementById("calendar-grid");
+  while(grid.children.length>7)grid.removeChild(grid.lastChild);
+  const firstDay=new Date(viewYear,viewMonth,1);
+  let dow=firstDay.getDay();dow=(dow===0)?6:dow-1;
+  const dim=new Date(viewYear,viewMonth+1,0).getDate();
+  const prev=new Date(viewYear,viewMonth,0).getDate();
+  const todayStr=fmtDate(cur);
+  for(let i=0;i<dow;i++) grid.appendChild(makeCell(prev-dow+1+i,fmtDate(new Date(viewYear,viewMonth-1,prev-dow+1+i)),true));
+  for(let d=1;d<=dim;d++) grid.appendChild(makeCell(d,fmtDate(new Date(viewYear,viewMonth,d)),false,fmtDate(new Date(viewYear,viewMonth,d))===todayStr));
+  const rem=(7-(dow+dim)%7)%7;
+  for(let i=1;i<=rem;i++) grid.appendChild(makeCell(i,fmtDate(new Date(viewYear,viewMonth+1,i)),true));
+  renderCapacity();
+  highlightSelected();
+}
+
+function selectDay(ds){selectedDate=ds;renderCapacity();highlightSelected()}
+function highlightSelected(){
+  document.querySelectorAll(".day-cell").forEach(c=>c.classList.remove("selected"));
+  document.querySelectorAll(".day-cell[data-ds]").forEach(c=>{if(c.dataset.ds===selectedDate)c.classList.add("selected")});
+}
+
+function makeCell(dn,ds,other,isToday){
+  const cell=document.createElement("div");
+  cell.className="day-cell"+(other?" other-month":"")+(isToday?" today":"")+(ds===selectedDate?" selected":"");
+  cell.dataset.ds=ds;
+  cell.onclick=()=>selectDay(ds);
+  const nd=document.createElement("div");nd.className="day-num";nd.textContent=dn;cell.appendChild(nd);
+  const evs=eventsOnDate(ds);
+  evs.forEach(ev=>{
+    const ch=document.createElement("div");
+    ch.className=`event-chip chip-${ev.type}`;
+    ch.textContent=ev.title+(ev.clientScr?" · "+ev.clientScr.toLocaleString()+" lượt":"");
+    ch.onclick=e=>{e.stopPropagation();openDetail(ev.id)};
+    cell.appendChild(ch);
+  });
+  return cell;
+}
+
+function changeMonth(d){viewMonth+=d;if(viewMonth>11){viewMonth=0;viewYear++}if(viewMonth<0){viewMonth=11;viewYear--}renderCalendar()}
+function goToday(){viewYear=cur.getFullYear();viewMonth=cur.getMonth();renderCalendar()}
+
+function groupedStaffHTML(checkedIds){
+  const groups={};
+  STAFF.forEach(s=>{
+    const g=s.group||"Khác";
+    if(!groups[g])groups[g]=[];
+    groups[g].push(s);
+  });
+  if(!Object.keys(groups).length) return '<div style="font-size:13px;color:#aaa">Chưa có nhân sự. Nhấn Sync để tải.</div>';
+  return Object.entries(groups).map(([g,members])=>`
+    <div class="staff-group">
+      <div class="staff-group-label">${g}</div>
+      <div class="staff-list">${members.map(s=>`
+        <label class="staff-item">
+          <input type="checkbox" value="${s.id}"${checkedIds.includes(s.id)?" checked":""}/>
+          <span>${s.name}</span>
+          <span style="font-size:11px;color:#aaa">(${s.role})</span>
+          ${s.type==="Freelance"?'<span class="freelance-badge">Freelance</span>':""}
+        </label>`).join("")}
+      </div>
+    </div>`).join("");
+}
+
+function openAdd(defaultDate){
+  const today=defaultDate||fmtDate(cur);
+  showModal(`
+    <div class="modal-header">
+      <span class="modal-title"><i class="ti ti-calendar-plus"></i> Thêm đợt khám mới</span>
+      <button class="btn" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="section-title">Thông tin khách hàng</div>
+    <div class="form-row"><label class="form-label">Tên khách hàng / đơn vị</label><input id="f-title" type="text" placeholder="VD: Trường THPT Lê Lợi"/></div>
+    <div class="inline-grid">
+      <div class="form-row"><label class="form-label">Số lượng khám dự kiến / ngày</label><input id="f-scr" type="number" min="0" placeholder="VD: 800"/></div>
+      <div class="form-row"><label class="form-label">Đơn giá / lượt (đ)</label><input id="f-price" type="number" min="0" placeholder="VD: 50000"/></div>
+      <div class="form-row"><label class="form-label">Loại hình</label>
+        <select id="f-type">
+          <option value="school">Trường học</option>
+          <option value="factory">Nhà máy / Công ty</option>
+          <option value="elderly">Người cao tuổi</option>
+        </select>
+      </div>
+    </div>
+    <div class="section-title">Thời gian</div>
+    <div class="inline-grid" style="grid-template-columns:1fr 1fr">
+      <div class="form-row"><label class="form-label">Ngày bắt đầu</label><input id="f-start" type="date" value="${today}"/></div>
+      <div class="form-row"><label class="form-label">Ngày kết thúc</label><input id="f-end" type="date" value="${today}"/></div>
+    </div>
+    <div class="section-title">Nhân sự phân công</div>
+    ${groupedStaffHTML([])}
+    <div class="section-title">Ghi chú</div>
+    <div class="form-row"><textarea id="f-note" placeholder="Địa chỉ, lưu ý..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Hủy</button>
+      <button class="btn btn-primary" onclick="saveEvent()">Lưu</button>
+    </div>
+  `);
+}
+
+async function saveEvent(){
+  const title=document.getElementById("f-title").value.trim();
+  if(!title){alert("Vui lòng nhập tên khách hàng");return}
+  const start=document.getElementById("f-start").value;
+  const end=document.getElementById("f-end").value;
+  if(end<start){alert("Ngày kết thúc không được trước ngày bắt đầu");return}
+  const scr=parseInt(document.getElementById("f-scr").value)||0;
+  const price=parseInt(document.getElementById("f-price").value)||0;
+  const staff=[...document.querySelectorAll(".staff-list input:checked")].map(i=>parseInt(i.value));
+  events.push({
+    id:nextId++,title,client:title,clientScr:scr,pricePerScr:price,
+    type:document.getElementById("f-type").value,
+    start,end,staff,note:document.getElementById("f-note").value
+  });
+  closeModal();renderCalendar();
+  await saveEvents();
+}
+
+function openDetail(id){
+  const ev=events.find(e=>e.id===id);if(!ev)return;
+  const nights=Math.round((parseDate(ev.end)-parseDate(ev.start))/86400000)+1;
+  const totalRev=(ev.pricePerScr||0)*ev.clientScr*nights;
+  const groups={};
+  ev.staff.forEach(sid=>{
+    const s=STAFF.find(x=>x.id===sid);if(!s)return;
+    const g=s.group||"Khác";
+    if(!groups[g])groups[g]=[];
+    groups[g].push(s);
+  });
+  const staffHTML=Object.entries(groups).map(([g,members])=>`
+    <div style="margin-bottom:6px">
+      <div style="font-size:11px;color:#aaa;margin-bottom:3px">${g}</div>
+      <div>${members.map(s=>{
+        const st=ROLE_STYLE[s.role]||{bg:"#eee",tc:"#333"};
+        return`<span class="staff-tag" style="background:${st.bg};color:${st.tc}">${s.name} · ${s.role}${s.type==="Freelance"?" · FL":""}</span>`;
+      }).join("")}</div>
+    </div>`).join("")||"<span style='color:#aaa;font-size:12px'>Chưa phân công</span>";
+
+  showModal(`
+    <div class="modal-header">
+      <div>
+        <span class="badge badge-${ev.type}">${TYPE_LABELS[ev.type]||ev.type}</span>
+        <div class="modal-title" style="margin-top:6px">${ev.title}</div>
+      </div>
+      <button class="btn" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="client-block">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <span style="font-size:14px;font-weight:600">${ev.client}</span>
+        <div style="text-align:right">
+          <div style="font-size:13px;color:#666"><i class="ti ti-eye"></i> ${ev.clientScr.toLocaleString()} lượt / ngày</div>
+          ${ev.pricePerScr>0?`<div style="font-size:12px;color:#aaa;margin-top:2px">${ev.pricePerScr.toLocaleString("vi-VN")}đ/lượt · <span style="color:#0c6e3d;font-weight:600">${totalRev.toLocaleString("vi-VN")}đ dự kiến</span></div>`:""}
+        </div>
+      </div>
+    </div>
+    <div class="detail-field"><i class="ti ti-calendar detail-icon"></i>
+      <div><div class="detail-label">Thời gian</div>
+      <div class="detail-val">${fmtDisplay(ev.start)} → ${fmtDisplay(ev.end)}
+      <span style="color:#aaa;font-size:12px">(${nights} ngày)</span></div></div>
+    </div>
+    <div class="detail-field"><i class="ti ti-users detail-icon"></i>
+      <div><div class="detail-label">Nhân sự (${ev.staff.length} người)</div>
+      <div style="margin-top:4px">${staffHTML}</div></div>
+    </div>
+    ${ev.note?`<div class="detail-field"><i class="ti ti-note detail-icon"></i>
+      <div><div class="detail-label">Ghi chú</div><div class="detail-val">${ev.note}</div></div>
+    </div>`:""}
+    <div class="modal-footer">
+      <button class="del-btn" onclick="deleteEvent(${ev.id})"><i class="ti ti-trash"></i> Xóa</button>
+      <button class="btn" onclick="closeModal()">Đóng</button>
+      <button class="btn btn-primary" onclick="openEdit(${ev.id})"><i class="ti ti-pencil"></i> Sửa</button>
+    </div>
+  `);
+}
+
+function openEdit(id){
+  const ev=events.find(e=>e.id===id);if(!ev)return;
+  showModal(`
+    <div class="modal-header">
+      <span class="modal-title"><i class="ti ti-pencil"></i> Sửa đợt khám</span>
+      <button class="btn" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="section-title">Thông tin khách hàng</div>
+    <div class="form-row"><label class="form-label">Tên khách hàng / đơn vị</label><input id="f-title" type="text" value="${ev.title}"/></div>
+    <div class="inline-grid">
+      <div class="form-row"><label class="form-label">Số lượng khám dự kiến / ngày</label><input id="f-scr" type="number" min="0" value="${ev.clientScr||""}"/></div>
+      <div class="form-row"><label class="form-label">Đơn giá / lượt (đ)</label><input id="f-price" type="number" min="0" value="${ev.pricePerScr||""}"/></div>
+      <div class="form-row"><label class="form-label">Loại hình</label>
+        <select id="f-type">
+          <option value="school"${ev.type==="school"?" selected":""}>Trường học</option>
+          <option value="factory"${ev.type==="factory"?" selected":""}>Nhà máy / Công ty</option>
+          <option value="elderly"${ev.type==="elderly"?" selected":""}>Người cao tuổi</option>
+        </select>
+      </div>
+    </div>
+    <div class="section-title">Thời gian</div>
+    <div class="inline-grid" style="grid-template-columns:1fr 1fr">
+      <div class="form-row"><label class="form-label">Ngày bắt đầu</label><input id="f-start" type="date" value="${ev.start}"/></div>
+      <div class="form-row"><label class="form-label">Ngày kết thúc</label><input id="f-end" type="date" value="${ev.end}"/></div>
+    </div>
+    <div class="section-title">Nhân sự phân công</div>
+    ${groupedStaffHTML(ev.staff)}
+    <div class="section-title">Ghi chú</div>
+    <div class="form-row"><textarea id="f-note" placeholder="Địa chỉ, lưu ý...">${ev.note||""}</textarea></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="openDetail(${ev.id})">Hủy</button>
+      <button class="btn btn-primary" onclick="updateEvent(${ev.id})">Lưu</button>
+    </div>
+  `);
+}
+
+async function updateEvent(id){
+  const ev=events.find(e=>e.id===id);if(!ev)return;
+  const title=document.getElementById("f-title").value.trim();
+  if(!title){alert("Vui lòng nhập tên khách hàng");return}
+  const start=document.getElementById("f-start").value;
+  const end=document.getElementById("f-end").value;
+  if(end<start){alert("Ngày kết thúc không được trước ngày bắt đầu");return}
+  ev.title=title;ev.client=title;
+  ev.clientScr=parseInt(document.getElementById("f-scr").value)||0;
+  ev.pricePerScr=parseInt(document.getElementById("f-price").value)||0;
+  ev.type=document.getElementById("f-type").value;
+  ev.start=start;ev.end=end;
+  ev.staff=[...document.querySelectorAll(".staff-list input:checked")].map(i=>parseInt(i.value));
+  ev.note=document.getElementById("f-note").value;
+  closeModal();renderCalendar();
+  await saveEvents();
+}
+
+async function deleteEvent(id){
+  if(!confirm("Xóa đợt khám này?"))return;
+  events=events.filter(e=>e.id!==id);
+  closeModal();renderCalendar();
+  await saveEvents();
+}
+
+function showModal(html){document.getElementById("modal-root").innerHTML=`<div class="modal-overlay" onclick="handleOverlay(event)"><div class="modal">${html}</div></div>`}
+function closeModal(){document.getElementById("modal-root").innerHTML=""}
+function handleOverlay(e){if(e.target.classList.contains("modal-overlay"))closeModal()}
+
+function showToast(msg,type){
+  const t=document.createElement("div");t.className="toast";
+  t.style.background=type==="error"?"#e24b4a":"#1d9e75";
+  t.textContent=msg;document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2500);
+}
+
+syncAll();
+</script>
+</body>
+</html>
